@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Mata Uang</title>
+    <style>
+        body {
+            background-image: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #gameContainer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-top: 10px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #clue {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: appear 1s forwards 0.5s;
+        }
+        @keyframes appear {
+            to { opacity: 1; }
+        }
+        #hint {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <h1 style="animation: glow 1.5s infinite alternate;">Tebak Mata Uang</h1>
+    <div id="clue"></div>
+    <div id="hint"></div>
+    <input type="text" id="userAnswer" placeholder="Tulis jawaban di sini..." />
+    <button id="checkAnswerButton" onclick="checkAnswer()">Cek Jawaban</button>
+    <button id="playAgainButton" style="display: none;" onclick="startGame()">Main Lagi</button>
+    <button onclick="window.location.href='../index.html'">Kembali ke Menu</button>
+</div>
+
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
+<script>
+    const currencies = [
+        { name: 'Rupiah', clue: 'Mata uang yang digunakan di Indonesia.' },
+        { name: 'Dollar AS', clue: 'Mata uang yang digunakan di Amerika Serikat.' },
+        { name: 'Euro', clue: 'Mata uang yang digunakan di banyak negara Eropa.' },
+        { name: 'Yen', clue: 'Mata uang yang digunakan di Jepang.' },
+        { name: 'Pound Sterling', clue: 'Mata uang yang digunakan di Inggris.' },
+        { name: 'Franc Swiss', clue: 'Mata uang yang digunakan di Swiss.' },
+        { name: 'Dolar Kanada', clue: 'Mata uang yang digunakan di Kanada.' },
+        { name: 'Dolar Australia', clue: 'Mata uang yang digunakan di Australia.' },
+        { name: 'Rupee', clue: 'Mata uang yang digunakan di India.' },
+        { name: 'Won', clue: 'Mata uang yang digunakan di Korea Selatan.' },
+        { name: 'Ringgit', clue: 'Mata uang yang digunakan di Malaysia.' },
+        { name: 'Baht', clue: 'Mata uang yang digunakan di Thailand.' },
+        { name: 'Peso', clue: 'Mata uang yang digunakan di Meksiko dan beberapa negara Amerika Latin.' },
+        { name: 'Dinar', clue: 'Mata uang yang digunakan di beberapa negara Arab.' },
+        { name: 'Riyal', clue: 'Mata uang yang digunakan di Arab Saudi.' },
+        { name: 'Krona', clue: 'Mata uang yang digunakan di Swedia.' },
+        { name: 'Zloty', clue: 'Mata uang yang digunakan di Polandia.' },
+        { name: 'Forint', clue: 'Mata uang yang digunakan di Hungaria.' },
+        { name: 'Koruna', clue: 'Mata uang yang digunakan di Republik Ceko.' },
+        { name: 'Lira', clue: 'Mata uang yang digunakan di Turki.' },
+        { name: 'Dirham', clue: 'Mata uang yang digunakan di Uni Emirat Arab.' },
+        { name: 'Dolar Selandia Baru', clue: 'Mata uang yang digunakan di Selandia Baru.' },
+        { name: 'Shekel', clue: 'Mata uang yang digunakan di Israel.' },
+        { name: 'Dolar Singapura', clue: 'Mata uang yang digunakan di Singapura.' },
+        { name: 'Peseta', clue: 'Mata uang yang digunakan di Spanyol sebelum Euro.' },
+        { name: 'Dolar Hong Kong', clue: 'Mata uang yang digunakan di Hong Kong.' },
+        { name: 'Dolar Barbados', clue: 'Mata uang yang digunakan di Barbados.' },
+        { name: 'Dolar Trinidad', clue: 'Mata uang yang digunakan di Trinidad dan Tobago.' },
+        { name: 'Kip', clue: 'Mata uang yang digunakan di Laos.' },
+        { name: 'Taka', clue: 'Mata uang yang digunakan di Bangladesh.' },
+        { name: 'Tugrik', clue: 'Mata uang yang digunakan di Mongolia.' },
+        { name: 'Kina', clue: 'Mata uang yang digunakan di Papua Nugini.' },
+        { name: 'Lepra', clue: 'Mata uang yang digunakan di Suriname.' },
+        { name: 'Som', clue: 'Mata uang yang digunakan di Kyrgyzstan.' },
+        { name: 'Manat', clue: 'Mata uang yang digunakan di Azerbaijan.' },
+        { name: 'Bahraini Dinar', clue: 'Mata uang yang digunakan di Bahrain.' }
+    ];
+
+    let currentCurrency;
+
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * currencies.length);
+        currentCurrency = currencies[randomIndex];
+        document.getElementById("clue").innerText = `Tebak mata uang: ${currentCurrency.clue}`;
+        document.getElementById("hint").innerText = `Hint: ${currentCurrency.name.substring(0, 3)}`;
+        document.getElementById("userAnswer").value = '';
+        document.getElementById("playAgainButton").style.display = "none"; // Sembunyikan tombol main lagi
+    }
+
+    function checkAnswer() {
+        const userGuess = document.getElementById("userAnswer").value;
+        
+        if (userGuess.toLowerCase() === currentCurrency.name.toLowerCase()) {
+            alert('Benar!');
+            document.getElementById("correctSound").play(); // Memutar suara benar
+        } else {
+            alert(`Salah! Jawabannya adalah ${currentCurrency.name}.`);
+            document.getElementById("wrongSound").play(); // Memutar suara salah
+        }
+        
+        document.getElementById("playAgainButton").style.display = "block"; // Tampilkan tombol main lagi
+    }
+
+    // Memulai game saat halaman dimuat
+    startGame();
+</script>
+
+</body>
+</html>
+</html>

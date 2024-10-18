@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Bendera</title>
+    <style>
+        body {
+            background-image: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #gameContainer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-top: 10px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #clue {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: appear 1s forwards 0.5s;
+        }
+        @keyframes appear {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <h1 style="animation: glow 1.5s infinite alternate;">Tebak Bendera</h1>
+    <div id="clue"></div>
+    <input type="text" id="userAnswer" placeholder="Tulis jawaban di sini..." />
+    <button id="checkAnswerButton" onclick="checkAnswer()">Cek Jawaban</button>
+    <button id="playAgainButton" style="display: none;" onclick="startGame()">Main Lagi</button>
+    <button onclick="window.location.href='../index.html'">Kembali ke Menu</button>
+</div>
+
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
+<script>
+    const flags = [
+        { name: 'Indonesia', clue: 'Bendera ini terdiri dari dua warna, merah dan putih, dengan merah di bagian atas.' },
+        { name: 'Jerman', clue: 'Bendera ini memiliki tiga garis horizontal berwarna hitam, merah, dan kuning.' },
+        { name: 'Prancis', clue: 'Bendera ini memiliki tiga garis vertikal berwarna biru, putih, dan merah.' },
+        { name: 'Italia', clue: 'Bendera ini terdiri dari tiga warna vertikal, hijau, putih, dan merah.' },
+        { name: 'Brasil', clue: 'Bendera ini memiliki latar hijau dengan rombus kuning dan lingkaran biru di tengahnya.' },
+        { name: 'Argentina', clue: 'Bendera ini memiliki dua garis biru dan satu garis putih dengan matahari di tengahnya.' },
+        { name: 'Amerika Serikat', clue: 'Bendera ini memiliki 13 garis horizontal merah dan putih serta 50 bintang putih di latar biru.' },
+        { name: 'Jepang', clue: 'Bendera ini memiliki latar putih dengan lingkaran merah di tengahnya.' },
+        { name: 'Kanada', clue: 'Bendera ini memiliki daun maple merah di tengah latar putih dan dua garis merah di sampingnya.' },
+        { name: 'Rusia', clue: 'Bendera ini terdiri dari tiga garis horizontal berwarna putih, biru, dan merah.' },
+        { name: 'Inggris', clue: 'Bendera ini dikenal sebagai Union Jack, menggabungkan salib St. George, St. Andrew, dan St. Patrick.' },
+        { name: 'Spanyol', clue: 'Bendera ini memiliki dua garis merah, satu garis kuning yang lebih lebar, dan lambang di sebelah kiri.' },
+        { name: 'Meksiko', clue: 'Bendera ini terdiri dari tiga warna vertikal, hijau, putih, dan merah, dengan lambang elang di tengahnya.' },
+        { name: 'Belanda', clue: 'Bendera ini memiliki tiga garis horizontal berwarna merah, putih, dan biru.' },
+        { name: 'Korea Selatan', clue: 'Bendera ini memiliki simbol yin-yang di tengah dengan garis hitam di sudut.' },
+        { name: 'India', clue: 'Bendera ini terdiri dari tiga warna horizontal, saffron, putih, dan hijau, dengan roda Ashoka di tengah.' },
+        { name: 'Turki', clue: 'Bendera ini memiliki latar merah dengan bulan sabit dan bintang putih di tengahnya.' },
+        { name: 'Swedia', clue: 'Bendera ini memiliki salib berwarna kuning di latar biru.' },
+        { name: 'Norwegia', clue: 'Bendera ini mirip dengan bendera Swedia tetapi memiliki salib biru di dalam salib putih.' },
+        { name: 'Finlandia', clue: 'Bendera ini memiliki salib biru di latar putih.' },
+        { name: 'Portugal', clue: 'Bendera ini terdiri dari dua warna vertikal, hijau dan merah, dengan lambang di tengahnya.' },
+        { name: 'Yunani', clue: 'Bendera ini memiliki sembilan garis horizontal biru dan putih dengan salib biru di sudut kiri atas.' },
+        { name: 'Cina', clue: 'Bendera ini memiliki latar merah dengan lima bintang kuning di sudut kiri atas.' },
+        { name: 'Vietnam', clue: 'Bendera ini memiliki latar merah dengan bintang kuning di tengahnya.' },
+        { name: 'Thailand', clue: 'Bendera ini memiliki lima garis horizontal merah, putih, dan biru, dengan biru di tengah.' },
+        { name: 'Filipina', clue: 'Bendera ini memiliki dua warna horizontal biru dan merah dengan segitiga putih di sebelah kiri.' },
+        { name: 'Pakistan', clue: 'Bendera ini memiliki latar hijau dengan bulan sabit dan bintang putih di tengahnya.' },
+        { name: 'UAE', clue: 'Bendera ini terdiri dari empat warna, merah, hijau, putih, dan hitam, dengan merah di sisi kiri.' },
+        { name: 'Arab Saudi', clue: 'Bendera ini berwarna hijau dengan kaligrafi putih dan pedang di bawahnya.' },
+        { name: 'Irak', clue: 'Bendera ini terdiri dari tiga warna horizontal merah, putih, dan hitam dengan tulisan Arab di tengahnya.' },
+        { name: 'Aljazair', clue: 'Bendera ini memiliki dua warna vertikal, hijau dan putih, dengan bulan sabit dan bintang merah.' },
+        { name: 'Maroko', clue: 'Bendera ini memiliki latar merah dengan bintang hijau di tengahnya.' },
+        { name: 'Selandia Baru', clue: 'Bendera ini memiliki latar biru dengan salib putih dan empat bintang merah.' },
+        { name: 'Austria', clue: 'Bendera ini terdiri dari tiga garis horizontal merah dan putih.' },
+        { name: 'Swiss', clue: 'Bendera ini memiliki latar merah dengan salib putih di tengahnya.' },
+        { name: 'Irlandia', clue: 'Bendera ini terdiri dari tiga warna vertikal, hijau, putih, dan oranye.' },
+        { name: 'Kroasia', clue: 'Bendera ini memiliki tiga garis horizontal merah, putih, dan biru dengan lambang di tengahnya.' },
+        { name: 'Cekoslowakia', clue: 'Bendera ini terdiri dari dua warna horizontal, putih dan merah, dengan segitiga biru di sebelah kiri.' },
+        { name: 'Slovakia', clue: 'Bendera ini terdiri dari tiga warna horizontal putih, biru, dan merah dengan lambang di kiri.' },
+        { name: 'Lituania', clue: 'Bendera ini memiliki tiga warna horizontal, kuning, hijau, dan merah.' },
+        { name: 'Latvia', clue: 'Bendera ini memiliki latar merah dengan garis putih di tengahnya.' },
+        { name: 'Estonia', clue: 'Bendera ini terdiri dari tiga warna horizontal, biru, hitam, dan putih.' },
+        { name: 'Georgia', clue: 'Bendera ini memiliki salib merah di latar putih dengan empat salib kecil di sudut.' },
+        { name: 'Ukraina', clue: 'Bendera ini terdiri dari dua warna horizontal, biru di atas dan kuning di bawah.' },
+        { name: 'Belarus', clue: 'Bendera ini memiliki dua warna horizontal merah dan hijau dengan pola di sisi kiri.' },
+        { name: 'Moldova', clue: 'Bendera ini memiliki tiga garis vertikal, biru, kuning, dan merah dengan lambang di tengahnya.' }
+    ];
+
+    let currentFlag;
+
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * flags.length);
+        currentFlag = flags[randomIndex];
+        document.getElementById("clue").innerText = `Tebak bendera: ${currentFlag.clue}`;
+        document.getElementById("userAnswer").value = '';
+        document.getElementById("playAgainButton").style.display = "none"; // Sembunyikan tombol main lagi
+    }
+
+    function checkAnswer() {
+        const userGuess = document.getElementById("userAnswer").value;
+        
+        if (userGuess.toLowerCase() === currentFlag.name.toLowerCase()) {
+            alert('Benar!');
+            document.getElementById("correctSound").play(); // Memutar suara benar
+        } else {
+            alert(`Salah! Jawabannya adalah ${currentFlag.name}.`);
+            document.getElementById("wrongSound").play(); // Memutar suara salah
+        }
+        
+        document.getElementById("playAgainButton").style.display = "block"; // Tampilkan tombol main lagi
+    }
+
+    // Memulai game saat halaman dimuat
+    startGame();
+</script>
+
+</body>
+</html>>
+</html>

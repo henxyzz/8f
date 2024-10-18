@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Ibu Kota</title>
+    <style>
+        body {
+            background-image: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #gameContainer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-top: 10px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #clue {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: appear 1s forwards 0.5s;
+        }
+        @keyframes appear {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <h1 style="animation: glow 1.5s infinite alternate;">Tebak Ibu Kota</h1>
+    <div id="clue"></div>
+    <input type="text" id="userAnswer" placeholder="Tulis jawaban di sini..." />
+    <button id="checkAnswerButton" onclick="checkAnswer()">Cek Jawaban</button>
+    <button id="playAgainButton" style="display: none;" onclick="startGame()">Main Lagi</button>
+    <button onclick="window.location.href='../index.html'">Kembali ke Menu</button>
+</div>
+
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
+<script>
+    const capitals = [
+        { capital: 'Jakarta', country: 'Indonesia' },
+        { capital: 'Tokyo', country: 'Jepang' },
+        { capital: 'Paris', country: 'Prancis' },
+        { capital: 'Canberra', country: 'Australia' },
+        { capital: 'Brasilia', country: 'Brazil' },
+        { capital: 'Kairo', country: 'Mesir' },
+        { capital: 'Moskow', country: 'Rusia' },
+        { capital: 'Ottawa', country: 'Kanada' },
+        { capital: 'Berlin', country: 'Jerman' },
+        { capital: 'Roma', country: 'Itali' },
+        { capital: 'Madrid', country: 'Spanyol' },
+        { capital: 'Washington D.C.', country: 'Amerika Serikat' },
+        { capital: 'Buenos Aires', country: 'Argentina' },
+        { capital: 'Bangkok', country: 'Thailand' },
+        { capital: 'New Delhi', country: 'India' },
+        { capital: 'Ankara', country: 'Turki' },
+        { capital: 'Mexico City', country: 'Meksiko' },
+        { capital: 'Abuja', country: 'Nigeria' },
+        { capital: 'Stokholm', country: 'Swedia' },
+        { capital: 'Helsinki', country: 'Finlandia' },
+        { capital: 'Bruxelles', country: 'Belgia' },
+        { capital: 'Amsterdam', country: 'Belanda' },
+        { capital: 'Lisbon', country: 'Portugal' },
+        { capital: 'Bucuresti', country: 'Rumania' },
+        { capital: 'Beijing', country: 'Cina' },
+        { capital: 'Seoul', country: 'Korea Selatan' },
+        { capital: 'Hanoi', country: 'Vietnam' },
+        { capital: 'Bogotá', country: 'Kolombia' },
+        { capital: 'Santiago', country: 'Chile' },
+        { capital: 'Kingston', country: 'Jamaika' },
+        { capital: 'Dublin', country: 'Irlandia' },
+        { capital: 'Wellington', country: 'Selandia Baru' },
+        { capital: 'Kuwait City', country: 'Kuwait' },
+        { capital: 'Riyadh', country: 'Arab Saudi' },
+        { capital: 'Bamako', country: 'Mali' },
+        { capital: 'Lusaka', country: 'Zambia' },
+        { capital: 'Kathmandu', country: 'Nepal' },
+        { capital: 'Dhaka', country: 'Bangladesh' },
+        { capital: 'Freetown', country: 'Sierra Leone' },
+        { capital: 'Quito', country: 'Ekuador' },
+        { capital: 'Lima', country: 'Peru' },
+        { capital: 'Nairobi', country: 'Kenya' },
+        { capital: 'Victoria', country: 'Seychelles' },
+        { capital: 'Lilongwe', country: 'Malawi' },
+        { capital: 'Maseru', country: 'Lesotho' },
+        { capital: 'Mbabane', country: 'Eswatini' },
+        { capital: 'Gaborone', country: 'Botswana' },
+        { capital: 'Accra', country: 'Ghana' },
+        { capital: 'Kigali', country: 'Rwanda' },
+        { capital: 'Maputo', country: 'Mozambik' },
+        { capital: 'Port Moresby', country: 'Papua Nugini' },
+        { capital: 'Tunis', country: 'Tunisia' },
+        { capital: 'Nicosia', country: 'Siprus' },
+        { capital: 'Tbilisi', country: 'Georgia' },
+        { capital: 'Yerevan', country: 'Armenia' },
+        { capital: 'Baku', country: 'Azerbaijan' },
+        { capital: 'Astana', country: 'Kazakhstan' },
+        { capital: 'Dushanbe', country: 'Tajikistan' },
+        { capital: 'Tashkent', country: 'Uzbekistan' },
+        { capital: 'Ashgabat', country: 'Turkmenistan' },
+        { capital: 'Bishkek', country: 'Kirgizstan' },
+        { capital: 'Islamabad', country: 'Pakistan' }
+    ];
+
+    let currentCapital;
+
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * capitals.length);
+        currentCapital = capitals[randomIndex];
+        document.getElementById("clue").innerText = `Tebak ibu kota dari negara ${currentCapital.country}:`;
+        document.getElementById("userAnswer").value = '';
+        document.getElementById("playAgainButton").style.display = "none"; // Sembunyikan tombol main lagi
+    }
+
+    function checkAnswer() {
+        const userGuess = document.getElementById("userAnswer").value;
+        
+        if (userGuess.toLowerCase() === currentCapital.capital.toLowerCase()) {
+            alert('Benar!');
+            document.getElementById("correctSound").play(); // Memutar suara benar
+        } else {
+            alert(`Salah! Jawabannya adalah ${currentCapital.capital}.`);
+            document.getElementById("wrongSound").play(); // Memutar suara salah
+        }
+        
+        document.getElementById("playAgainButton").style.display = "block"; // Tampilkan tombol main lagi
+    }
+
+    // Memulai game saat halaman dimuat
+    startGame();
+</script>
+
+</body>
+</html>
+</html>

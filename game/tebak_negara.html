@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Negara</title>
+    <style>
+        body {
+            background-image: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #gameContainer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <h1>Tebak Negara</h1>
+    <div id="clue"></div>
+    <input type="text" id="userAnswer" placeholder="Tulis jawaban di sini..." />
+    <button id="checkAnswerButton" onclick="checkAnswer()">Cek Jawaban</button>
+    <button id="playAgainButton" style="display: none;" onclick="startGame()">Main Lagi</button>
+    <button onclick="window.location.href='../index.html'">Kembali ke Menu</button>
+</div>
+
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
+<script>
+    const countries = [
+        { country: 'Indonesia', clue: 'Negara kepulauan terbesar di dunia' },
+        { country: 'Jepang', clue: 'Negara dengan teknologi tinggi dan sushi' },
+        { country: 'Prancis', clue: 'Negara yang terkenal dengan Menara Eiffel' },
+        { country: 'Australia', clue: 'Negara dengan kanguru dan Great Barrier Reef' },
+        { country: 'Brazil', clue: 'Negara dengan hutan hujan Amazon' },
+        { country: 'Mesir', clue: 'Negara dengan piramida dan Sphinx' },
+        { country: 'Rusia', clue: 'Negara terbesar di dunia' },
+        { country: 'Kanada', clue: 'Negara dengan banyak danau dan maple' },
+        { country: 'Jerman', clue: 'Negara yang dikenal dengan bir dan Oktoberfest' },
+        { country: 'Itali', clue: 'Negara dengan pasta dan pizza' },
+        { country: 'Spanyol', clue: 'Negara yang terkenal dengan flamenco dan paella' },
+        { country: 'Amerika Serikat', clue: 'Negara yang memiliki Patung Liberty' },
+        { country: 'Argentina', clue: 'Negara yang terkenal dengan tango' },
+        { country: 'Thailand', clue: 'Negara dengan pantai indah dan makanan pedas' },
+        { country: 'India', clue: 'Negara yang terkenal dengan Taj Mahal' },
+        { country: 'Turki', clue: 'Negara yang menghubungkan Asia dan Eropa' },
+        { country: 'Meksiko', clue: 'Negara yang dikenal dengan taco dan mariachi' },
+        { country: 'Nigeria', clue: 'Negara dengan populasi terbesar di Afrika' },
+        { country: 'Swedia', clue: 'Negara yang terkenal dengan IKEA' },
+        { country: 'Finlandia', clue: 'Negara dengan banyak danau dan sauna' },
+        { country: 'Belgia', clue: 'Negara yang terkenal dengan cokelat dan wafel' },
+        { country: 'Belanda', clue: 'Negara dengan kincir angin dan tulip' },
+        { country: 'Portugal', clue: 'Negara yang terkenal dengan fado dan anggur' },
+        { country: 'Rumania', clue: 'Negara yang dikenal dengan Dracula' },
+        { country: 'Cina', clue: 'Negara dengan Tembok Besar' },
+        { country: 'Korea Selatan', clue: 'Negara yang terkenal dengan K-Pop' },
+        { country: 'Vietnam', clue: 'Negara yang terkenal dengan pho' },
+        { country: 'Colombia', clue: 'Negara penghasil kopi terkenal' },
+        { country: 'Chile', clue: 'Negara panjang di selatan Amerika Selatan' },
+        { country: 'Jamaika', clue: 'Negara asal reggae' },
+        { country: 'Irlandia', clue: 'Negara yang dikenal dengan shamrock' },
+        { country: 'Selandia Baru', clue: 'Negara dengan hobbit dan rugby' },
+        { country: 'Kuwait', clue: 'Negara kecil di Teluk Persia' },
+        { country: 'Saudi Arabia', clue: 'Negara dengan Makkah dan Madinah' },
+        { country: 'Mali', clue: 'Negara dengan sejarah kerajaan yang kaya' },
+        { country: 'Zambia', clue: 'Negara dengan air terjun Victoria' },
+        { country: 'Nepal', clue: 'Negara dengan pegunungan Himalaya' },
+        { country: 'Bangladesh', clue: 'Negara dengan sungai yang banyak' },
+        { country: 'Sierra Leone', clue: 'Negara yang terkenal dengan berlian' },
+        { country: 'Ekuador', clue: 'Negara yang memiliki kepulauan Galapagos' },
+        { country: 'Peru', clue: 'Negara yang dikenal dengan Machu Picchu' },
+        { country: 'Bahama', clue: 'Negara yang terkenal dengan pantai' },
+        { country: 'Suriname', clue: 'Negara kecil di Amerika Selatan' },
+        { country: 'Barbados', clue: 'Negara yang terkenal dengan rum' },
+        { country: 'Malta', clue: 'Negara pulau kecil di Mediterania' },
+        { country: 'Oman', clue: 'Negara di Timur Tengah dengan budaya yang kaya' },
+        { country: 'Katar', clue: 'Negara kecil di Teluk yang kaya' },
+        { country: 'Yordania', clue: 'Negara yang memiliki Petra' },
+        { country: 'Zanzibar', clue: 'Pulau di lepas pantai Tanzania' },
+        { country: 'Angola', clue: 'Negara yang kaya akan sumber daya alam' },
+        { country: 'Botswana', clue: 'Negara yang dikenal dengan satwa liar' },
+        { country: 'Ghana', clue: 'Negara dengan sejarah kerajaan yang kuat' },
+        { country: 'Uganda', clue: 'Negara yang dikenal dengan Danau Victoria' },
+        { country: 'Tanzania', clue: 'Negara yang memiliki Gunung Kilimanjaro' },
+        { country: 'Somalia', clue: 'Negara dengan garis pantai terpanjang di Afrika' },
+        { country: 'Seychelles', clue: 'Negara kepulauan indah di Samudera Hindia' },
+        { country: 'Malawi', clue: 'Negara dengan Danau Malawi' },
+        { country: 'Lesotho', clue: 'Negara yang sepenuhnya dikelilingi oleh Afrika Selatan' },
+        { country: 'Eswatini', clue: 'Negara kecil di selatan Afrika' }
+    ];
+
+    let currentCountry;
+
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * countries.length);
+        currentCountry = countries[randomIndex];
+        document.getElementById("clue").innerText = currentCountry.clue;
+        document.getElementById("userAnswer").value = '';
+        document.getElementById("playAgainButton").style.display = "none"; // Sembunyikan tombol main lagi
+    }
+
+    function checkAnswer() {
+        const userGuess = document.getElementById("userAnswer").value;
+        
+        if (userGuess.toLowerCase() === currentCountry.country.toLowerCase()) {
+            alert('Benar!');
+            document.getElementById("correctSound").play(); // Memutar suara benar
+        } else {
+            alert(`Salah! Jawabannya adalah ${currentCountry.country}.`);
+            document.getElementById("wrongSound").play(); // Memutar suara salah
+        }
+        
+        document.getElementById("playAgainButton").style.display = "block"; // Tampilkan tombol main lagi
+    }
+
+    // Memulai game saat halaman dimuat
+    startGame();
+</script>
+
+</body>
+</html>
+</html>

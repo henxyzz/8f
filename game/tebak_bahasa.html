@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Bahasa</title>
+    <style>
+        body {
+            background-image: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #gameContainer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-top: 10px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #clue {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: appear 1s forwards 0.5s;
+        }
+        @keyframes appear {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <h1 style="animation: glow 1.5s infinite alternate;">Tebak Bahasa</h1>
+    <div id="clue"></div>
+    <input type="text" id="userAnswer" placeholder="Tulis jawaban di sini..." />
+    <button id="checkAnswerButton" onclick="checkAnswer()">Cek Jawaban</button>
+    <button id="playAgainButton" style="display: none;" onclick="startGame()">Main Lagi</button>
+    <button onclick="window.location.href='../index.html'">Kembali ke Menu</button>
+</div>
+
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
+<script>
+    const languages = [
+        { name: 'Indonesia', clue: 'Bahasa resmi yang digunakan di Indonesia.' },
+        { name: 'Inggris', clue: 'Bahasa internasional yang sering digunakan di seluruh dunia.' },
+        { name: 'Jerman', clue: 'Bahasa yang digunakan di Jerman dan negara-negara berbahasa Jerman lainnya.' },
+        { name: 'Prancis', clue: 'Bahasa yang dikenal sebagai bahasa cinta.' },
+        { name: 'Spanyol', clue: 'Bahasa resmi di Spanyol dan banyak negara di Amerika Latin.' },
+        { name: 'Mandarin', clue: 'Bahasa resmi di Tiongkok yang memiliki banyak penutur.' },
+        { name: 'Arab', clue: 'Bahasa yang ditulis dari kanan ke kiri dan digunakan di banyak negara Arab.' },
+        { name: 'Rusia', clue: 'Bahasa resmi di Rusia, menggunakan alfabet Cyrillic.' },
+        { name: 'Italia', clue: 'Bahasa yang digunakan di Italia dan dikenal dengan keindahan dan seni.' },
+        { name: 'Portugis', clue: 'Bahasa resmi di Brasil dan Portugal.' },
+        { name: 'Jepang', clue: 'Bahasa yang memiliki tiga jenis tulisan: Hiragana, Katakana, dan Kanji.' },
+        { name: 'Korea', clue: 'Bahasa yang digunakan di Korea Selatan dan Korea Utara.' },
+        { name: 'Belanda', clue: 'Bahasa yang digunakan di Belanda dan Belgia.' },
+        { name: 'Turki', clue: 'Bahasa resmi di Turki, menggunakan alfabet Latin.' },
+        { name: 'Swedia', clue: 'Bahasa yang digunakan di Swedia.' },
+        { name: 'Denmark', clue: 'Bahasa resmi di Denmark.' },
+        { name: 'Norwegia', clue: 'Bahasa yang digunakan di Norwegia.' },
+        { name: 'Finlandia', clue: 'Bahasa resmi yang digunakan di Finlandia, berbeda dari bahasa Skandinavia lainnya.' },
+        { name: 'Rumania', clue: 'Bahasa yang memiliki pengaruh Latin dan digunakan di Rumania.' },
+        { name: 'Hungaria', clue: 'Bahasa yang digunakan di Hungaria, memiliki struktur yang unik.' },
+        { name: 'Ceko', clue: 'Bahasa resmi di Republik Ceko.' },
+        { name: 'Slovakia', clue: 'Bahasa yang digunakan di Slovakia.' },
+        { name: 'Bulgaria', clue: 'Bahasa resmi di Bulgaria, menggunakan alfabet Cyrillic.' },
+        { name: 'Yunani', clue: 'Bahasa yang memiliki tulisan kuno dan digunakan di Yunani.' },
+        { name: 'Hebrew', clue: 'Bahasa yang ditulis dari kanan ke kiri dan digunakan di Israel.' },
+        { name: 'Swahili', clue: 'Bahasa yang banyak digunakan di Afrika Timur.' },
+        { name: 'Thai', clue: 'Bahasa resmi di Thailand, memiliki karakter unik.' },
+        { name: 'Vietnam', clue: 'Bahasa yang digunakan di Vietnam dan memiliki aksen yang berbeda.' },
+        { name: 'Bengali', clue: 'Bahasa yang digunakan di Bangladesh dan di sebagian India.' },
+        { name: 'Urdu', clue: 'Bahasa resmi di Pakistan dan memiliki kemiripan dengan Hindi.' },
+        { name: 'Malay', clue: 'Bahasa yang digunakan di Malaysia dan Indonesia.' },
+        { name: 'Filipina', clue: 'Bahasa resmi di Filipina yang merupakan campuran beberapa bahasa.' },
+        { name: 'Tamil', clue: 'Bahasa yang digunakan di India selatan dan Sri Lanka.' },
+        { name: 'Telugu', clue: 'Bahasa yang digunakan di negara bagian Andhra Pradesh dan Telangana di India.' },
+        { name: 'Marathi', clue: 'Bahasa yang digunakan di negara bagian Maharashtra, India.' },
+        { name: 'Gujarati', clue: 'Bahasa yang digunakan di negara bagian Gujarat, India.' },
+        { name: 'Punjabi', clue: 'Bahasa yang digunakan di Punjab, India dan Pakistan.' },
+        { name: 'Assamese', clue: 'Bahasa yang digunakan di negara bagian Assam, India.' },
+        { name: 'Nepali', clue: 'Bahasa resmi di Nepal.' },
+        { name: 'Somali', clue: 'Bahasa resmi di Somalia.' },
+        { name: 'Amharik', clue: 'Bahasa resmi di Ethiopia.' },
+        { name: 'Sunda', clue: 'Bahasa yang digunakan oleh suku Sunda di Indonesia.' },
+        { name: 'Jawa', clue: 'Bahasa yang digunakan oleh suku Jawa di Indonesia.' },
+        { name: 'Basa Bali', clue: 'Bahasa yang digunakan di Bali, Indonesia.' },
+        { name: 'Katalan', clue: 'Bahasa yang digunakan di Katalonia, Spanyol.' },
+        { name: 'Galicia', clue: 'Bahasa yang digunakan di wilayah Galicia, Spanyol.' },
+        { name: 'Basque', clue: 'Bahasa yang digunakan di wilayah Basque, Spanyol dan Prancis.' },
+        { name: 'Scots Gaelic', clue: 'Bahasa yang digunakan di Skotlandia.' },
+        { name: 'Welsh', clue: 'Bahasa yang digunakan di Wales.' },
+        { name: 'Sami', clue: 'Bahasa yang digunakan oleh suku Sami di Norwegia, Swedia, Finlandia, dan Rusia.' },
+        { name: 'Bahasa Isyarat', clue: 'Bahasa yang digunakan oleh komunitas tunarungu, tidak menggunakan suara.' }
+    ];
+
+    let currentLanguage;
+
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * languages.length);
+        currentLanguage = languages[randomIndex];
+        document.getElementById("clue").innerText = `Tebak bahasa: ${currentLanguage.clue}`;
+        document.getElementById("userAnswer").value = '';
+        document.getElementById("playAgainButton").style.display = "none"; // Sembunyikan tombol main lagi
+    }
+
+    function checkAnswer() {
+        const userGuess = document.getElementById("userAnswer").value;
+        
+        if (userGuess.toLowerCase() === currentLanguage.name.toLowerCase()) {
+            alert('Benar!');
+            document.getElementById("correctSound").play(); // Memutar suara benar
+        } else {
+            alert(`Salah! Jawabannya adalah ${currentLanguage.name}.`);
+            document.getElementById("wrongSound").play(); // Memutar suara salah
+        }
+        
+        document.getElementById("playAgainButton").style.display = "block"; // Tampilkan tombol main lagi
+    }
+
+    // Memulai game saat halaman dimuat
+    startGame();
+</script>
+
+</body>
+</html>
+</html>

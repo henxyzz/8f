@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .blink {
+            color: gold;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 11;
+        }
+
+        .question {
+            font-size: 2em;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+
+        #videoBackground {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 10;
+            display: none;
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="blink">Verifikasi Bahwa kamu Adalah manusia</div>
+        <div class="question" id="question"></div>
+        <input type="number" id="answer" placeholder="Masukkan jawaban" />
+        <button onclick="verifyAnswer()">Submit</button>
+        <div id="result"></div>
+
+        <video id="videoBackground" autoplay>
+            <source src="accesgranted.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <script>
+        // Generate a random question
+        const num1 = Math.floor(Math.random() * 10) + 1;
+        const num2 = Math.floor(Math.random() * 10) + 1;
+        const correctAnswer = num1 + num2;
+        document.getElementById('question').innerText = `Berapakah ${num1} + ${num2}?`;
+
+        function verifyAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const resultDiv = document.getElementById('result');
+            const video = document.getElementById('videoBackground');
+
+            if (userAnswer === correctAnswer) {
+                resultDiv.innerText = "Jawaban benar!";
+                video.style.display = "block";
+                video.play();
+
+                // Redirect to struktur.html after the video ends
+                video.onended = function() {
+                    window.location.href = "struktur.html";
+                };
+            } else {
+                resultDiv.innerText = "Jawaban salah, coba lagi!";
+            }
+        }
+    </script>
+</body>
+</html>

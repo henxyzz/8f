@@ -1,0 +1,362 @@
+Untuk memutar video secara otomatis saat halaman `cek_khodam.html` dimuat, tanpa kontrol, dan memastikan video memenuhi layar, Anda bisa mengubah kode seperti berikut:
+
+1. **Autoplay Video**: Setel atribut `autoplay` dan `playsinline` pada elemen video. 
+2. **Fullscreen dan Menyembunyikan Kontrol**: Gunakan CSS untuk mengatur video agar memenuhi layar dan sembunyikan elemen kontrol dengan menghilangkan atribut `controls`.
+
+Berikut adalah contoh implementasi yang telah disesuaikan:
+
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Khodam🦎</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1; /* Video di latar belakang */
+        }
+
+        .content {
+            position: relative;
+            z-index: 10; /* Konten di atas video */
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 3em;
+        }
+
+        #nameInput, #checkButton {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            width: 300px;
+            margin-bottom: 10px;
+            outline: none;
+            transition: transform 0.2s;
+        }
+
+        #nameInput {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffcc00; /* Warna emas */
+            text-align: center;
+        }
+
+        #nameInput:focus {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00;
+        }
+
+        #checkButton {
+            background: linear-gradient(45deg, #ffcc00, #ffd700, #ffcc00);
+            color: white;
+            cursor: pointer;
+        }
+
+        #checkButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #ffcc00, 0 0 20px #ffd700;
+        }
+
+        #checkButton:disabled {
+            background: linear-gradient(45deg, #555, #666);
+            cursor: not-allowed;
+        }
+
+        #card {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 50, 0.9);
+            border-radius: 10px;
+            border: 1px solid #ffcc00; /* Warna emas */
+            box-shadow: 0 0 15px #ffcc00, 0 0 30px #ffcc00;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: scale(0.8);
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #ffcc00; /* Warna emas */
+        }
+
+        #card.show {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .hologram {
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00, 0 0 30px #ffcc00; /* Warna emas */
+        }
+
+        #closeButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f00;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #closeButton:hover {
+            background-color: #d32f2f;
+        }
+
+        #cardHeader {
+            border-bottom: 1px solid #ffcc00; /* Warna emas */
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        #cardTitle {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #cardContent {
+            font-size: 18px;
+        }
+
+        #history {
+            margin-top: 20px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #ffcc00; /* Warna emas */
+        }
+
+        #historyTitle {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <video id="accessVideo" autoplay playsinline>
+        <source src="accessgranted.mp4" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+    </video>
+
+    <div class="content">
+        <h1>Cek Khodam Anda</h1>
+        <input type="text" id="nameInput" placeholder="Masukkan nama Anda..." />
+        <button id="checkButton" onclick="checkKhodam()">Cek Khodam</button>
+
+        <div id="card">
+            <div id="cardHeader">
+                <div id="cardTitle">Kartu Khodam</div>
+            </div>
+            <div id="cardContent" class="hologram">
+                <div id="result"></div>
+            </div>
+            <button id="closeButton" onclick="closeCard()">Tutup</button>
+        </div>
+
+        <div id="history">
+            <div id="historyTitle">Riwayat Nama, Hasil, dan Waktu:</div>
+            <ul id="historyList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const animals = [
+            { name: "Singa", kelebihan: "Keberanian dan kekuatan", kekurangan: "Keras kepala dan egois" },
+            { name: "Harimau", kelebihan: "Keberanian dan kegigihan", kekurangan: "Agresif dan sulit diatur" },
+            { name: "Gajah", kelebihan: "Kekuatan dan kebijaksanaan", kekurangan: "Lamban dan keras kepala" },
+            { name: "Kucing", kelebihan: "Kelincahan dan kemandirian", kekurangan: "Cenderung menyendiri" },
+            { name: "Anjing", kelebihan: "Kesetiaan dan keberanian", kekurangan: "Terlalu bergantung pada orang lain" },
+            { name: "Burung", kelebihan: "Kebebasan dan perspektif luas", kekurangan: "Cenderung sulit fokus" },
+            { name: "Kuda", kelebihan: "Kekuatan dan kecepatan", kekurangan: "Kadang tidak stabil" },
+            { name: "Kambing", kelebihan: "Kerajinan dan ketahanan", kekurangan: "Keras kepala" },
+            { name: "Domba", kelebihan: "Ketenangan dan kesabaran", kekurangan: "Cenderung pasif" },
+            { name: "Sapi", kelebihan: "Ketenangan dan kekuatan", kekurangan: "Lamban" },
+            { name: "Kelinci", kelebihan: "Cepat dan cerdik", kekurangan: "Mudah panik" },
+            { name: "Kuda Laut", kelebihan: "Keunikan dan ketahanan", kekurangan: "Cenderung lamban" },
+            { name: "Kura-kura", kelebihan: "Ketahanan dan kebijaksanaan", kekurangan: "Sangat lambat" },
+            { name: "Ikan", kelebihan: "Keseimbangan dan ketenangan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ular", kelebihan: "Kecerdikan dan kelincahan", kekurangan: "Cenderung licik" },
+            { name: "Kepiting", kelebihan: "Perlindungan dan ketahanan", kekurangan: "Suka menyendiri" },
+            { name: "Penguin", kelebihan: "Kesetiaan dan kerjasama", kekurangan: "Canggung di darat" },
+            { name: "Kakatua", kelebihan: "Komunikasi dan keceriaan", kekurangan: "Bising" },
+            { name: "Orangutan", kelebihan: "Kecerdasan dan kekuatan", kekurangan: "Soliter" },
+            { name: "Panda", kelebihan: "Ketenangan dan daya tarik", kekurangan: "Mudah lelah" },
+            { name: "Gorila", kelebihan: "Kekuatan dan kebijaksanaan", kekurangan: "Keras kepala" },
+            { name: "Zebra", kelebihan: "Keunikannya dalam kelompok", kekurangan: "Mudah terkejut" },
+            { name: "Badak", kelebihan: "Kekuatan dan ketahanan", kekurangan: "Cenderung agresif" },
+            { name: "Kijang", kelebihan: "Kecepatan dan kelincahan", kekurangan: "Mudah terkejut" },
+            { name: "Beruang", kelebihan: "Kekuatan dan kebijaksanaan", kekurangan: "Cenderung soliter" },
+            { name: "Bison", kelebihan: "Ketahanan dan kekuatan", kekurangan: "Kadang agresif" },
+            { name: "Rusa", kelebihan: "Kecepatan dan kelincahan", kekurangan: "Mudah cemas" },
+            { name: "Singa Laut", kelebihan: "Kecerdikan dan ketahanan", kekurangan: "Cenderung bising" },
+            { name: "Kucing Besar", kelebihan: "Kekuatan dan kemandirian", kekurangan: "Soliter" },
+            { name: "Babi", kelebihan: "Ketahanan dan kecerdikan", kekurangan: "Kadang malas" },
+            { name: "Ayam", kelebihan: "Kerajinan dan keberanian", kekurangan: "Mudah cemas" },
+            { name: "Kambing Gunung", kelebihan: "Ketahanan dan keberanian", kekurangan: "Keras kepala" },
+            { name: "Kuda Nil", kelebihan: "Kekuatan dan ketenangan", kekurangan: "Cenderung agresif" },
+            { name: "Panda Merah", kelebihan: "Ketenangan dan daya tarik", kekurangan: "Soliter" },
+            { name: "Tikus", kelebihan: "Kecerdikan dan kelincahan", kekurangan: "Licik" },
+            { name: "Musang", kelebihan: "Kecerdikan dan kelincahan", kekurangan: "Suka menyendiri" },
+            { name: "Macan Tutul", kelebihan: "Kecepatan dan kekuatan", kekurangan: "Soliter" },
+            { name: "Jaguar", kelebihan: "Kekuatan dan kelincahan", kekurangan: "Cenderung agresif" },
+            { name: "Cheetah", kelebihan: "Kecepatan dan kelincahan", kekurangan: "Mudah lelah" },
+            { name: "Kucing Anggora", kelebihan: "Kecantikan dan kelincahan", kekurangan: "Cenderung manja" },
+            { name: "Kucing Siam", kelebihan: "Kecerdasan dan kemandirian", kekurangan: "Cenderung bising" },
+            { name: "Kucing Persia", kelebihan: "Kecantikan dan ketenangan", kekurangan: "Perawatan tinggi" },
+            { name: "Kucing Maine Coon", kelebihan: "Kekuatan dan kecerdasan", kekurangan: "Cenderung manja" },
+            { name: "Kucing Sphynx", kelebihan: "Keunikan dan kecerdikan", kekurangan: "Perawatan tinggi" },
+            { name: "Anjing Labrador", kelebihan: "Kesetiaan dan kecerdikan", kekurangan: "Terlalu ramah" },
+            { name: "Anjing Beagle", kelebihan: "Kecerdikan dan keberanian", kekurangan: "Cenderung keras kepala" },
+            { name: "Anjing Bulldog", kelebihan: "Ketahanan dan keberanian", kekurangan: "Kurang aktif" },
+            { name: "Anjing Poodle", kelebihan: "Kecerdikan dan kelincahan", kekurangan: "Perawatan tinggi" },
+            { name: "Anjing Dachshund", kelebihan: "Keunikan dan keberanian", kekurangan: "Cenderung keras kepala" },
+            { name: "Kucing Persia", kelebihan: "Kecantikan dan ketenangan", kekurangan: "Perawatan tinggi" },
+            { name: "Kucing Siam", kelebihan: "Kecerdasan dan kemandirian", kekurangan: "Cenderung bising" },
+            { name: "Kucing Anggora", kelebihan: "Kecantikan dan kelincahan", kekurangan: "Cenderung manja" },
+            { name: "Kucing Maine Coon", kelebihan: "Kekuatan dan kecerdasan", kekurangan: "Cenderung manja" },
+            { name: "Kucing Sphynx", kelebihan: "Keunikan dan kecerdikan", kekurangan: "Perawatan tinggi" },
+            { name: "Anjing Rottweiler", kelebihan: "Keberanian dan kesetiaan", kekurangan: "Cenderung agresif" },
+            { name: "Anjing Golden Retriever", kelebihan: "Kesetiaan dan keceriaan", kekurangan: "Terlalu ramah" },
+            { name: "Anjing Siberian Husky", kelebihan: "Energi dan keindahan", kekurangan: "Suka berlari" },
+            { name: "Anjing Shih Tzu", kelebihan: "Kecantikan dan keceriaan", kekurangan: "Perawatan tinggi" },
+            { name: "Anjing Chihuahua", kelebihan: "Keberanian dan kelincahan", kekurangan: "Mudah cemas" },
+            { name: "Kuda Arab", kelebihan: "Kecepatan dan ketahanan", kekurangan: "Cenderung gelisah" },
+            { name: "Kuda Quarter", kelebihan: "Kecepatan dan kelincahan", kekurangan: "Kadang canggung" },
+            { name: "Kuda Andalusia", kelebihan: "Kekuatan dan keindahan", kekurangan: "Perawatan tinggi" },
+            { name: "Kuda Clydesdale", kelebihan: "Kekuatan dan ketenangan", kekurangan: "Lamban" },
+            { name: "Zebra", kelebihan: "Keunikannya dalam kelompok", kekurangan: "Mudah terkejut" },
+            { name: "Kuda Laut", kelebihan: "Keunikan dan ketahanan", kekurangan: "Cenderung lamban" },
+            { name: "Kuda Nil", kelebihan: "Kekuatan dan ketenangan", kekurangan: "Cenderung agresif" },
+            { name: "Kambing Gunung", kelebihan: "Ketahanan dan keberanian", kekurangan: "Keras kepala" },
+            { name: "Gajah Afrika", kelebihan: "Kekuatan dan kebijaksanaan", kekurangan: "Lamban" },
+            { name: "Gajah Asia", kelebihan: "Kekuatan dan kebijaksanaan", kekurangan: "Lamban" },
+            { name: "Kucing Hutan", kelebihan: "Kelincahan dan kecerdasan", kekurangan: "Cenderung menyendiri" },
+            { name: "Anjing Pemburu", kelebihan: "Keberanian dan ketangkasan", kekurangan: "Kadang agresif" },
+            { name: "Anjing Penjaga", kelebihan: "Kesetiaan dan keberanian", kekurangan: "Cenderung agresif" },
+            { name: "Burung Hantu", kelebihan: "Penglihatan malam yang baik", kekurangan: "Mudah terganggu" },
+            { name: "Burung Merak", kelebihan: "Kecantikan dan daya tarik", kekurangan: "Mudah terkejut" },
+            { name: "Burung Kenari", kelebihan: "Suara merdu dan ceria", kekurangan: "Mudah cemas" },
+            { name: "Burung Kakaktua", kelebihan: "Kecerdasan dan kemampuan berbicara", kekurangan: "Bising" },
+            { name: "Burung Rajawali", kelebihan: "Kekuatan dan kecepatan", kekurangan: "Cenderung soliter" },
+            { name: "Burung Flamingo", kelebihan: "Keindahan dan keanggunan", kekurangan: "Mudah terkejut" },
+            { name: "Kuda Laut", kelebihan: "Keunikan dan daya tarik", kekurangan: "Cenderung lamban" },
+            { name: "Kura-kura", kelebihan: "Ketahanan dan kebijaksanaan", kekurangan: "Sangat lambat" },
+            { name: "Ikan Salmon", kelebihan: "Ketahanan dan kekuatan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Paus", kelebihan: "Kekuatan dan kebijaksanaan", kekurangan: "Lamban" },
+            { name: "Ikan Hiu", kelebihan: "Kekuatan dan ketangkasan", kekurangan: "Agresif" },
+            { name: "Ikan Koi", kelebihan: "Keindahan dan ketenangan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Betta", kelebihan: "Kecantikan dan keberanian", kekurangan: "Agresif" },
+            { name: "Ikan Arapaima", kelebihan: "Kekuatan dan ketahanan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Clownfish", kelebihan: "Kecantikan dan kelincahan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Guppy", kelebihan: "Kecantikan dan kelincahan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Betta", kelebihan: "Kecantikan dan keberanian", kekurangan: "Agresif" },
+            { name: "Ikan Mas", kelebihan: "Kecantikan dan ketenangan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Discus", kelebihan: "Kecantikan dan ketenangan", kekurangan: "Perawatan tinggi" },
+            { name: "Ikan Corydoras", kelebihan: "Ketahanan dan kelincahan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Neon Tetra", kelebihan: "Kecantikan dan kelincahan", kekurangan: "Mudah terpengaruh" },
+            { name: "Ikan Betta", kelebihan: "Kecantikan dan keberanian", kekurangan: "Agresif" },
+            { name: "Ikan Koi", kelebihan: "Keindahan dan ketenangan", kekurangan: "Mudah terpengaruh" }
+            // Tambahkan data hewan lainnya di sini...
+        ];
+
+        function checkKhodam() {
+            const input = document.getElementById("nameInput").value;
+            const resultDiv = document.getElementById("result");
+            const button = document.getElementById("checkButton");
+            const card = document.getElementById("card");
+            const historyList = document.getElementById("historyList");
+
+            // Nonaktifkan tombol
+            button.disabled = true;
+
+            // Mengacak nama hewan dari daftar
+            const randomIndex = Math.floor(Math.random() * animals.length);
+            const khodam = animals[randomIndex];
+
+            resultDiv.innerHTML = `<div style="border: 1px solid #ffcc00; padding: 10px; border-radius: 8px;">
+                                       <p><strong>Nama:</strong> ${input}</p>
+                                       <p><strong>Khodam:</strong> ${khodam.name}</p>
+                                       <p><strong>Kelebihan:</strong> ${khodam.kelebihan}</p>
+                                       <p><strong>Kekurangan:</strong> ${khodam.kekurangan}</p>
+                                   </div>`;
+
+            // Menampilkan kartu KTP dengan hasil
+            card.classList.add('show');
+
+            // Menyimpan nama, hasil, dan waktu ke riwayat
+            addToHistory(input, khodam.name);
+
+            // Set timeout untuk cooldown tombol
+            setTimeout(() => {
+                button.disabled = false; // Aktifkan kembali tombol setelah 5 detik
+            }, 5000); // 5000 ms = 5 detik
+        }
+
+        function closeCard() {
+            const card = document.getElementById("card");
+            card.classList.remove('show');
+        }
+
+        function addToHistory(name, khodamName) {
+            const historyList = document.getElementById("historyList");
+            const li = document.createElement("li");
+            const date = new Date();
+            const formattedDate = date.toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+            const formattedTime = date.toLocaleTimeString('id-ID');
+            li.textContent = `Nama: ${name} - Khodam: ${khodamName} (Diperiksa pada: ${formattedDate}, ${formattedTime})`;
+
+            historyList.appendChild(li);
+            saveToLocalStorage(name, khodamName, formattedDate, formattedTime);
+        }
+
+        function saveToLocalStorage(name, khodamName, date, time) {
+            let history = JSON.parse(localStorage.getItem('history')) || [];
+            history.push({ name, khodamName, date, time });
+            localStorage.setItem('history', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById("historyList");
+            const history = JSON.parse(localStorage.getItem('history')) || [];
+            history.forEach(entry => {
+                const li = document.createElement("li");
+                li.textContent = `Nama: ${entry.name} - Khodam: ${entry.khodamName} (Diperiksa pada: ${entry.date}, ${entry.time})`;
+                historyList.appendChild(li);
+            });
+        }
+
+        // Muat riwayat saat halaman dimuat
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>

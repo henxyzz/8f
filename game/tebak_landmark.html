@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tebak Landmark</title>
+    <style>
+        body {
+            background-image: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        #gameContainer {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-top: 10px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #clue {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: appear 1s forwards 0.5s;
+        }
+        @keyframes appear {
+            to { opacity: 1; }
+        }
+        #hint {
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <h1 style="animation: glow 1.5s infinite alternate;">Tebak Landmark</h1>
+    <div id="clue"></div>
+    <div id="hint"></div>
+    <input type="text" id="userAnswer" placeholder="Tulis jawaban di sini..." />
+    <button id="checkAnswerButton" onclick="checkAnswer()">Cek Jawaban</button>
+    <button id="playAgainButton" style="display: none;" onclick="startGame()">Main Lagi</button>
+    <button onclick="window.location.href='../index.html'">Kembali ke Menu</button>
+</div>
+
+<audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="wrong.mp3" preload="auto"></audio>
+
+<script>
+    const landmarks = [
+        { name: 'Menara Eiffel', clue: 'Landmark terkenal di Paris, Prancis, yang dikenal karena menaranya yang tinggi.' },
+        { name: 'Patung Liberty', clue: 'Patung yang terletak di New York dan merupakan simbol kebebasan.' },
+        { name: 'Taj Mahal', clue: 'Mausoleum indah di Agra, India, dibangun oleh seorang raja untuk istrinya.' },
+        { name: 'Colosseum', clue: 'Arena kuno di Roma, Italia, tempat gladiator bertarung.' },
+        { name: 'Piramida Giza', clue: 'Struktur kuno di Mesir yang merupakan salah satu dari Tujuh Keajaiban Dunia.' },
+        { name: 'Big Ben', clue: 'Menara jam besar di London, Inggris, sering disebut dengan nama yang salah.' },
+        { name: 'Angkor Wat', clue: 'Kuil megah di Kamboja, contoh arsitektur Khmer yang terkenal.' },
+        { name: 'Sydney Opera House', clue: 'Bangunan ikonik di Sydney, Australia, memiliki desain unik seperti layar perahu.' },
+        { name: 'Stonehenge', clue: 'Situs prasejarah di Inggris dengan batu-batu besar yang disusun melingkar.' },
+        { name: 'Machu Picchu', clue: 'Kota Inca kuno di Peru, terletak di pegunungan Andes.' },
+        { name: 'Kuil Parthenon', clue: 'Kuil kuno di Athena, Yunani, yang didedikasikan untuk dewi Athena.' },
+        { name: 'Menara Pisa', clue: 'Menara miring yang terkenal terletak di Pisa, Italia.' },
+        { name: 'Patung Kristus Penebus', clue: 'Patung besar di Rio de Janeiro, Brasil, yang menjulang di atas kota.' },
+        { name: 'Burj Khalifa', clue: 'Gedung tertinggi di dunia yang terletak di Dubai, Uni Emirat Arab.' },
+        { name: 'Kota Terlarang', clue: 'Kompleks istana di Beijing, Cina, yang dulunya menjadi kediaman kaisar.' },
+        { name: 'Masjid Sultan Ahmed', clue: 'Masjid terkenal di Istanbul, Turki, juga dikenal sebagai Masjid Biru.' },
+        { name: 'Kota Tua Jerusalem', clue: 'Kota kuno di Israel yang memiliki banyak situs religius penting.' },
+        { name: 'Neuschwanstein Castle', clue: 'Istana yang terletak di Jerman, terkenal dengan arsitektur dongeng.' },
+        { name: 'Menara Jam Zytglogge', clue: 'Menara jam kuno yang terletak di Bern, Swiss.' },
+        { name: 'Candi Prambanan', clue: 'Candi Hindu yang terletak di Yogyakarta, Indonesia, yang terkenal dengan arsitekturnya.' },
+        { name: 'Candi Borobudur', clue: 'Candi Buddha terbesar di dunia yang terletak di Indonesia.' },
+        { name: 'Kuil Ryoan-ji', clue: 'Kuil Zen terkenal di Kyoto, Jepang, yang terkenal dengan taman batu.' },
+        { name: 'Candi Angkor Thom', clue: 'Kota kuno di Kamboja, merupakan bagian dari kompleks Angkor.' },
+        { name: 'Candi Ta Prohm', clue: 'Candi yang terkenal dengan pohon besar yang tumbuh di atasnya, terletak di Angkor.' },
+        { name: 'Katedral Notre-Dame', clue: 'Katedral ikonik yang terletak di Paris, Prancis, dengan arsitektur Gotik.' },
+        { name: 'Sagrada Familia', clue: 'Gereja yang sedang dibangun di Barcelona, Spanyol, karya Antoni Gaudí.' },
+        { name: 'Palazzo Vecchio', clue: 'Istana bersejarah di Florence, Italia, yang merupakan simbol kekuasaan.' },
+        { name: 'Candi Himeji', clue: 'Kastil Jepang yang indah dan terawat baik, terletak di Himeji, Jepang.' },
+        { name: 'Kota Petra', clue: 'Kota kuno yang terukir di tebing, terletak di Yordania.' },
+        { name: 'Candi Khajuraho', clue: 'Kuil yang terkenal dengan ukiran erotis, terletak di India.' },
+        { name: 'Candi Chichen Itza', clue: 'Situs arkeologi Maya yang terkenal di Meksiko.' },
+        { name: 'Menara Kembar Petronas', clue: 'Menara kembar yang terkenal di Kuala Lumpur, Malaysia.' },
+        { name: 'Menara CN', clue: 'Menara tertinggi di Kanada yang terletak di Toronto.' },
+        { name: 'Kuil Borobudur', clue: 'Situs warisan dunia yang terkenal di Indonesia, berupa candi Buddha.' },
+        { name: 'Kota Machu Picchu', clue: 'Kota kuno Inca yang terletak di pegunungan Andes, Peru.' },
+        { name: 'Candi Wat Pho', clue: 'Candi di Bangkok, Thailand, yang terkenal dengan patung Buddha berbaring.' },
+        { name: 'Katedral St. Basil', clue: 'Katedral yang terkenal dengan kubah berwarna-warni di Moskow, Rusia.' },
+        { name: 'Jembatan Golden Gate', clue: 'Jembatan terkenal yang menghubungkan San Francisco dengan Marin County, California.' },
+        { name: 'Acropolis', clue: 'Reruntuhan kuno di Yunani yang pernah menjadi tempat suci bagi dewa-dewa Yunani kuno.' },
+        { name: 'Menara Burj Al Arab', clue: 'Hotel berbentuk layar yang terletak di Dubai, Uni Emirat Arab.' },
+        { name: 'Katedral St. Peter', clue: 'Katedral di Vatikan yang merupakan pusat Gereja Katolik.' },
+        { name: 'Patung Moai', clue: 'Patung besar yang terbuat dari batu yang terletak di Pulau Paskah, Chili.' },
+        { name: 'Kastil Edinburgh', clue: 'Kastil bersejarah yang terletak di atas bukit di Edinburgh, Skotlandia.' },
+        { name: 'Patung David', clue: 'Patung terkenal karya Michelangelo yang terletak di Florence, Italia.' },
+        { name: 'Candi Pura Tanah Lot', clue: 'Candi yang terletak di atas batu karang di Bali, Indonesia.' },
+        { name: 'Monumen Nasional', clue: 'Monumen yang terletak di Jakarta, Indonesia, simbol perjuangan bangsa.' }
+    ];
+
+    let currentLandmark;
+
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * landmarks.length);
+        currentLandmark = landmarks[randomIndex];
+        document.getElementById("clue").innerText = `Tebak landmark: ${currentLandmark.clue}`;
+        document.getElementById("hint").innerText = `Hint: ${currentLandmark.name.substring(0, 3)}`;
+        document.getElementById("userAnswer").value = '';
+        document.getElementById("playAgainButton").style.display = "none"; // Sembunyikan tombol main lagi
+    }
+
+    function checkAnswer() {
+        const userGuess = document.getElementById("userAnswer").value;
+        
+        if (userGuess.toLowerCase() === currentLandmark.name.toLowerCase()) {
+            alert('Benar!');
+            document.getElementById("correctSound").play(); // Memutar suara benar
+        } else {
+            alert(`Salah! Jawabannya adalah ${currentLandmark.name}.`);
+            document.getElementById("wrongSound").play(); // Memutar suara salah
+        }
+        
+        document.getElementById("playAgainButton").style.display = "block"; // Tampilkan tombol main lagi
+    }
+
+    // Memulai game saat halaman dimuat
+    startGame();
+</script>
+
+</body>
+</html>
+</html>

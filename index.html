@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Web 8Fantastic ✨</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            overflow-y: auto;
+            background: url('https://img.freepik.com/free-vector/minimal-art-deco-wallpaper-with-decorative-gold-glitter_53876-43827.jpg?size=626&ext=jpg&ga=GA1.2.2138273360.1726812943&semt=ais_hybrid') no-repeat center top;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #videoBackground {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 10;
+            display: none;
+        }
+
+        .content {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+            text-align: center;
+            color: #fff;
+            z-index: 20;
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        .approve-button, .game-button, .home-button {
+            background-color: #e8c547;
+            color: #1a1a2e;
+            border: 2px solid #d4af37;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            width: auto;
+            border-radius: 5px;
+        }
+
+        .approve-button:hover, .game-button:hover, .home-button:hover {
+            background-color: #d4af37;
+            color: #fff;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #f9d95d;
+            text-shadow: 0 0 15px #ffcc00;
+        }
+
+        .time-widget {
+            font-size: 30px;
+            margin: 20px 0;
+            color: #ffcc00;
+        }
+
+        .separator {
+            border-bottom: 2px solid #FFF;
+            margin: 20px 0;
+        }
+
+        footer {
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #f9d95d;
+            text-align: center;
+            margin-top: 20px;
+            width: 100%;
+            position: relative;
+        }
+
+        footer p {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        footer a {
+            color: #e8c547;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .animation {
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #e8c547, #d4af37);
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            animation: slide 3s linear infinite;
+        }
+
+        @keyframes slide {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .scrolling-footer {
+            white-space: nowrap;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .scrolling-footer p {
+            display: inline-block;
+            animation: scroll 10s linear infinite;
+            margin: 0;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container" id="buttonContainer">
+        <button class="approve-button" id="startVideoButton">Pergi ke WEB</button>
+        <button class="approve-button" onclick="window.location.href='#';">Chat GLOBAL</button>
+        <footer>
+            <p>Jangan lewatkan kesempatan untuk menjelajahi website kami! <br>
+            <strong><a href="#" onclick="document.getElementById('startVideoButton').click();">Klik tombol "Pergi ke WEB" untuk melanjutkan.</a></strong></p>
+            <div class="animation"></div>
+            <div class="scrolling-footer">
+                <p>Selamat datang di website kami! Nikmati pengalaman belajar yang menyenangkan!</p>
+            </div>
+        </footer>
+    </div>
+
+    <video id="videoBackground" autoplay playsinline>
+        <source src="loading.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="content" id="content">
+        <h1>JADWAL PELAJARAN VIII-F</h1>
+        <div class="time-widget" id="timeWidget"></div>
+
+        <div id="schedule"></div>
+
+        <div class="separator"></div>
+
+        <h2>Menu Game</h2>
+        <button class="game-button" onclick="window.location.href='game/tebak_negara.html'">Tebak Negara</button>
+        <button class="game-button" onclick="window.location.href='game/tebak_ibu_kota.html'">Tebak Ibu Kota</button>
+        <button class="game-button" onclick="window.location.href='game/tebak_landmark.html'">Tebak Landmark</button>
+        <button class="game-button" onclick="window.location.href='game/tebak_mata_uang.html'">Tebak Mata Uang</button>
+        <button class="game-button" onclick="window.location.href='game/tebak_bendera.html'">Tebak Bendera</button>
+        <button class="game-button" onclick="window.location.href='game/tebak_bahasa.html'">Tebak Bahasa</button>
+
+        <div class="separator"></div>
+
+        <h2>Fitur Fun</h2>
+        <button class="game-button" onclick="window.location.href='fun/tebak_gambar.html'">Tebak Gambar</button>
+        <button class="game-button" onclick="window.location.href='fun/kuis_berita.html'">Kuis Berita</button>
+        <button class="game-button" onclick="window.location.href='fun/tebak_lagu.html'">Tebak Lagu</button>
+        <button class="game-button" onclick="window.location.href='fun/kuis_teknologi.html'">Kuis Teknologi</button>
+        <button class="game-button" onclick="window.location.href='fun/jadwal_obrolan.html'">Jadwal Obrolan</button>
+        <button class="game-button" onclick="window.location.href='fun/cek_khodam.html'">Cek Khodam</button>
+
+        <button class="approve-button" onclick="window.location.href='verify.html'">Lihat Struktur</button>
+
+        <div class="footer">
+            <h2>Kontak Kami</h2>
+            <p>Website ini adalah cerminan dari semangat dan solidaritas <strong>Kelas 8F</strong>, tempat kita belajar dan tumbuh bersama. Kami bangga dengan pencapaian dan kebersamaan kami.</p>
+            <div class="contact-info">
+                <p>Nomor Telepon: <a href="tel:6285723701289">6285723701289</a></p>
+                <a href="https://www.instagram.com/eight.fantasticc__?igsh=MXd3cDhsemY4emMyeA==" target="_blank">Hubungi Kami di Instagram</a>
+            </div>
+        </div>
+    </div>
+
+    <audio id="backgroundMusic" src="musik_utama.mp3" autoplay></audio>
+
+    <script>
+        const startVideoButton = document.getElementById('startVideoButton');
+        const video = document.getElementById('videoBackground');
+        const content = document.getElementById('content');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const buttonContainer = document.getElementById('buttonContainer');
+
+        startVideoButton.onclick = function() {
+            buttonContainer.style.display = 'none'; // Sembunyikan tombol
+            video.style.display = 'block'; // Tampilkan video
+            video.play(); // Mulai memutar video
+        };
+
+        video.onended = function() {
+            video.style.display = 'none'; // Sembunyikan video setelah selesai
+            content.style.display = 'block'; // Tampilkan konten
+            setTimeout(() => {
+                content.style.opacity = 1; // Fade-in konten
+            }, 100);
+            
+            backgroundMusic.currentTime = 0; // Mulai musik dari awal
+            backgroundMusic.play(); // Mainkan musik setelah video selesai
+        };
+
+        function updateTime() {
+            const timeWidget = document.getElementById('timeWidget');
+            const now = new Date();
+            timeWidget.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function showSchedule() {
+            const schedule = {
+                "Senin": [
+                    "Ingat Uang Kas!! (Sebelum belajar)",
+                    "IPA",
+                    "Bahasa Inggris",
+                    "Seni Budaya"
+                ],
+                "Selasa": [
+                    "Informatika",
+                    "PPKn",
+                    "Bahasa Indonesia",
+                    "P5"
+                ],
+                "Rabu": [
+                    "IPS",
+                    "Bahasa Indonesia",
+                    "Matematika",
+                    "P5"
+                ],
+                "Kamis": [
+                    "PJOK",
+                    "Bahasa Sunda",
+                    "IPA",
+                    "Bahasa Indonesia"
+                ],
+                "Jumat": [
+                    "P5",
+                    "BK",
+                    "PAI"
+                ],
+                "Sabtu": [
+                    "Ingat Uang Kas!! (Sebelum belajar)",
+                    "P5",
+                    "Bahasa Inggris",
+                    "Matematika"
+                ]
+            };
+
+            const now = new Date();
+            const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const today = days[now.getDay()];
+            const todaySchedule = schedule[today] || [];
+
+            const scheduleDiv = document.getElementById('schedule');
+            scheduleDiv.innerHTML = `<h2>${today}:</h2>` + todaySchedule.map(subject => `<p>${subject}</p>`).join('');
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime(); // Initialize the time on page load
+        showSchedule(); // Display schedule according to the day
+    </script>
+</body>
+</html>l>
